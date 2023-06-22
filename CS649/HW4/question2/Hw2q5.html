@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Seattle Weather - Precipitation Trend Line Chart</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+<h2>Precipitation Trend Line Chart</h2>
+
+<script>
+// Set up the SVG element and dimensions
+var margin = { top: 20, right: 20, bottom: 50, left: 70 };
+var width = 600 - margin.left - margin.right;
+var height = 400 - margin.top - margin.bottom;
+var svg = d3.select("body")
+  .append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+// Load the data from the CSV file
+d3.csv("https://raw.githubusercontent.com/vega/vega/main/docs/data/seattle-weather.csv").then(function(data) {
+
+  // Set up the X and Y scales for the line chart
+  var xScale = d3.scaleUtc()
+    .domain(d3.extent(data, function(d) { return new Date(d.date); }))
+    .range([0, width]);
+  var yScale = d3.scaleLinear()
+    .domain([0, d3.max(data, function(d) { return +d.precipitation; })])
+    .range([height, 0]);
+
+  // Set up the X and Y axes for the line chart
+  var xAxis = d3.axisBottom(xScale);
+  var yAxis = d3.axisLeft(yScale);
+
+  // Add the X and Y axes to the SVG element
+  svg.append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+  svg.append("g")
+    .call(yAxis);
+
+  // Add the line to the line chart
+  var line = d3.line()
+    .x(function(d) { return xScale(new Date(d.date)); })
+    .y(function(d) { return yScale(+d.precipitation); });
+  svg.append("path")
+    .datum(data)
+    .attr("fill", "none")
+    .attr("stroke", "black")
+    .attr("stroke-width", 2)
+    .attr("d", line);
+
+  // Add the X and Y axis labels to the SVG element
+  svg.append("text")
+    .attr("x", width/2)
+    .attr("y", height + margin.bottom)
+    .attr("text-anchor", "middle")
+    .text("Date");
+  svg.append("text")
+    .attr("x", -height/2)
+    .attr("y", -40)
+    .attr("text-anchor", "middle")
+    .attr("transform", "rotate(-90)")
+    .text("Precipitation");
+
+});
+</script>
+<p>Here we can see the distribution of perecipitation with the date and how it varies from a range of 0-55. Therefore we can understand that at this date the precipitation of rain  </p>
+</body>
+</html>
+
+

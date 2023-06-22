@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Seattle Weather - Wind Histogram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+  </head>
+  <body>
+    <h2>Seattle Weather - Wind Histogram</h2>
+
+    <script>
+      // Load the data from the CSV file
+      d3.csv(
+        "https://raw.githubusercontent.com/vega/vega/main/docs/data/seattle-weather.csv"
+      ).then(function (data) {
+        // Convert the wind values from strings to numbers
+        data.forEach(function (d) {
+          d.wind = +d.wind;
+        });
+
+        // Set up the histogram layout
+        var bins = d3
+          .histogram()
+          .value(function (d) {
+            return d.wind;
+          })
+          .thresholds(12)(data);
+
+        // Set up the scales for the histogram
+        var xScale = d3
+          .scaleLinear()
+          .domain([
+            0,
+            d3.max(bins, function (d) {
+              return d.x1;
+            }),
+          ])
+          .range([50, 500]);
+
+        var yScale = d3
+          .scaleLinear()
+          .domain([
+            0,
+            d3.max(bins, function (d) {
+              return d.length;
+            }),
+          ])
+          .range([300, 50]);
+
+        // Create the SVG element and set its dimensions
+        var svg = d3
+          .select("body")
+          .append("svg")
+          .attr("width", 600)
+          .attr("height", 400);
+
+        // Add the bars to the histogram
+        svg
+          .selectAll("rect")
+          .data(bins)
+          .enter()
+          .append("rect")
+          .attr("x", function (d) {
+            return xScale(d.x0);
+          })
+          .attr("y", function (d) {
+            return yScale(d.length);
+          })
+          .attr("width", function (d) {
+            return xScale(d.x1) - xScale(d.x0) - 1;
+          })
+          .attr("height", function (d) {
+            return 300 - yScale(d.length);
+          })
+          .attr("fill", "steelblue");
+
+        // Add the X axis label
+        svg
+          .append("text")
+          .attr("x", 275)
+          .attr("y", 380)
+          .attr("text-anchor", "middle")
+          .text("Speed of Wind (mph)");
+
+        // Add the Y axis label
+        svg
+          .append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -175)
+          .attr("y", 11)
+          .attr("text-anchor", "middle")
+          .text("Frequency");
+
+        // Add the X axis values
+        svg
+          .selectAll(".xAxis")
+          .data(xScale.ticks(10))
+          .enter()
+          .append("text")
+          .attr("class", "xAxis")
+          .attr("x", function (d) {
+            return xScale(d);
+          })
+          .attr("y", 320)
+          .attr("text-anchor", "middle")
+          .text(function (d) {
+            return d;
+          });
+
+        // Add the Y axis values
+        svg
+          .selectAll(".yAxis")
+          .data(yScale.ticks(7))
+          .enter()
+          .append("text")
+          .attr("class", "yAxis")
+          .attr("x", 30)
+          .attr("y", function (d) {
+            return yScale(d);
+          })
+          .attr("text-anchor", "middle")
+          .text(function (d) {
+            return d;
+          });
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Total Cylinders by Model Year</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      d3.csv('auto-mpg.csv').then(data => {
+        // Generate an array of objects with the total number of cylinders for each model year
+        const cylindersByYear = {};
+        data.forEach(car => {
+          const year = parseInt(car.model_year);
+          const cylinders = parseInt(car.cylinders);
+          if (!cylindersByYear[year]) {
+            cylindersByYear[year] = 0;
+          }
+          cylindersByYear[year] += cylinders;
+        });
+        
+        // Sort the results by model year
+        const sortedResults = Object.entries(cylindersByYear)
+          .sort((a, b) => a[0] - b[0])
+          .map(entry => ({ year: entry[0], totalCylinders: entry[1] }));
+
+        // Display the results as an HTML table
+        const table = document.createElement('table');
+        const headerRow = table.insertRow();
+        const yearHeader = headerRow.insertCell();
+        yearHeader.textContent = 'Model Year';
+        const cylindersHeader = headerRow.insertCell();
+        cylindersHeader.textContent = 'Total Cylinders';
+        sortedResults.forEach(result => {
+          const row = table.insertRow();
+          const yearCell = row.insertCell();
+          yearCell.textContent = result.year;
+          const cylindersCell = row.insertCell();
+          cylindersCell.textContent = result.totalCylinders;
+        });
+        document.body.appendChild(table);
+      });
+    </script>
+        <h1>Total Cylinders by Model Year</h1>
+
+  </head>
+  <body>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Auto MPG Dataset</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+  </head>
+  <body>
+    <h1>Auto MPG Dataset</h1>
+    <table id="data-table">
+      <thead>
+        <tr>
+          <th>MPG</th>
+          <th>Cylinders</th>
+          <th>Displacement</th>
+          <th>Horsepower</th>
+          <th>Weight</th>
+          <th>Acceleration</th>
+          <th>Model Year</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <script>
+      d3.csv("auto-mpg.csv").then(function(data) {
+        const tableBody = d3.select("#data-table tbody");
+        const rows = tableBody.selectAll("tr")
+                              .data(data.slice(0, 6))
+                              .enter()
+                              .append("tr");
+        rows.selectAll("td")
+            .data(function(row) {
+              return Object.values(row);
+            })
+            .enter()
+            .append("td")
+            .text(function(d) {
+              return d;
+            });
+      });
+    </script>
+  </body>
+</html>
+

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Auto MPG Dataset</title>
+	<script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+	<h1>Number of Cars by Model Year</h1>
+	<table id="table"></table>
+
+	<script>
+		// Load the CSV file using D3
+		d3.csv("auto-mpg.csv").then(function(data) {
+			// Extract the model year column
+			let modelYears = data.map(row => parseInt(row.model_year));
+
+			// Count the number of cars for each model year
+			let counts = {};
+			modelYears.forEach(year => {
+				counts[year] = counts[year] ? counts[year] + 1 : 1;
+			});
+
+			// Create the table rows and cells using D3
+			let table = d3.select("#table");
+			table.append("tr")
+				.append("th")
+				.text("Model Year");
+			table.select("tr")
+				.append("th")
+				.text("Number of Cars");
+			Object.keys(counts).forEach(year => {
+				let row = table.append("tr");
+				row.append("td")
+					.text(year);
+				row.append("td")
+					.text(counts[year]);
+			});
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Auto MPG Data Analysis</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+    <h1>Distribution of the model years amongst the cars</h1>
+  <table id="countsTableCar">
+    <thead>
+      <tr>
+        <th>Model Year</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  <svg id="pieChart"></svg>
+
+  <script>
+    d3.csv("https://raw.githubusercontent.com/plotly/datasets/master/auto-mpg.csv").then(function(data) {
+      const counts = d3.rollups(data, v => v.length, d => d["model-year"]);
+      const countsArray = counts.map(([key, value]) => ({ "model-year": key, "count": value }));
+      const tbody = d3.select("#countsTableCar tbody");
+      countsArray.forEach(function(d) {
+        const row = tbody.append("tr");
+        row.append("td").text(d["model-year"]);
+        row.append("td").text(d["count"]);
+      });
+
+      const width = 400;
+      const height = 400;
+      const radius = Math.min(width, height) / 2;
+
+      const svg = d3.select("#pieChart")
+                    .attr("width", width)
+                    .attr("height", height);
+
+      const pie = d3.pie()
+                    .sort(null)
+                    .value(d => d.count);
+
+      const arc = d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(radius - 5);
+
+      const color = d3.scaleOrdinal(d3.schemeCategory10);
+
+      const arcs = svg.selectAll("g.arc")
+                      .data(pie(countsArray))
+                      .enter()
+                      .append("g")
+                      .attr("class", "arc")
+                      .attr("transform", `translate(${width / 2}, ${height / 2})`);
+
+      arcs.append("path")
+          .attr("d", arc)
+          .attr("fill", d => color(d.data["model-year"]));
+
+          arcs.append("text")
+          .attr("transform", d => {
+            const pos = arc.centroid(d);
+            pos[0] = radius * (d.startAngle + d.endAngle) / 2 > Math.PI ? pos[0] + 5 : pos[0] - 5;
+            pos[1]-=15;
+            return `translate(${pos})`;
+          })
+          .attr("dy", "0.35em")
+          .text(d => `${d.data["model-year"]}`)
+          .attr("fill", "black")
+          .attr("text-anchor", "middle");
+
+      arcs.append("text")
+          .attr("transform", d => {
+            const pos = arc.centroid(d);
+            pos[0] = radius * (d.startAngle + d.endAngle) / 2 > Math.PI ? pos[0] + 5 : pos[0] - 5;
+            pos[1] += 5;
+            return `translate(${pos})`;
+          })
+          .attr("dy", "0.35em")
+          .text(d => `(${(d.data.count / data.length * 100).toFixed(2)}%)`)
+          .attr("fill", "white")
+          .attr("text-anchor", "middle");
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<body>
+<head>
+  <title>Auto MPG Data Analysis</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<h1>Line Graph with D3</h1>
+<div id="lineGraph"></div>
+<table id="countsTableCylinder">
+  <thead>
+    <tr>
+      <th>Model Year</th>
+      <th>Total Cylinders</th>
+    </tr>
+  </thead>
+  <tbody>
+  </tbody>
+</table>
+<script>
+  d3.csv("https://raw.githubusercontent.com/plotly/datasets/master/auto-mpg.csv").then(function(data) {
+    const counts = d3.rollups(data, v => d3.sum(v, d => d.cylinders), d => d["model-year"]);
+    const countsArray = counts.map(([key, value]) => ({ "model-year": key, "total cylinders": value }));
+
+    // Sort the countsArray in descending order based on the model year
+    countsArray.sort((a, b) => b["model-year"] - a["model-year"]);
+
+    const tbody = d3.select("#countsTableCylinder tbody");
+    countsArray.forEach(function(d) {
+      const row = tbody.append("tr");
+      row.append("td").text(d["model-year"]);
+      row.append("td").text(d["total cylinders"]);
+    });
+
+    // Plot the line graph
+    const margin = { top: 20, right: 20, bottom: 40, left: 50 };
+    
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    const svg = d3.select("#lineGraph")
+      .append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    const x = d3.scaleBand()
+      .range([0, width])
+      .domain(countsArray.map(d => d["model-year"]))
+      .padding(0.2);
+
+    const y = d3.scaleLinear()
+      .range([height, 0])
+      .domain([0, d3.max(countsArray, d => d["total cylinders"])]);
+
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    svg.append("path")
+      .datum(countsArray)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 2)
+      .attr("d", d3.line()
+        .x(d => x(d["model-year"]))
+        .y(d => y(d["total cylinders"]))
+      );
+
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate(" + (-margin.left/2-10) + "," + (height/2) + ")rotate(-90)")
+      .text("Total cylinders");
+
+    svg.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate(" + (width/2-5) + "," + (height + margin.bottom-5) + ")")
+      .text("Model year");
+
+  });
+</script>
+</body>
+</html>
